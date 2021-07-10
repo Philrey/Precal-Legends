@@ -81,10 +81,10 @@ Material:
     - _UVSec: 0
     - _UseUIAlphaClip: 0
     - _ZWrite: 1
-    - hstep: 0.5
-    - radius: 12.7
+    - hstep: 0.452
+    - radius: 14.4
     - resolution: 800
-    - vstep: 0.5
+    - vstep: 0.586
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
