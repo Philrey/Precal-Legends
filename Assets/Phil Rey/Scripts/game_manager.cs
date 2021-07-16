@@ -5,6 +5,9 @@ using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 
+using UnityEngine.Networking;
+using SimpleJSON;
+
 public class game_manager: MonoBehaviour {
     //Panels
     private GameObject questionsPanel;
@@ -24,6 +27,9 @@ public class game_manager: MonoBehaviour {
 
     //Buttons
     GameObject btnTitleBar;
+
+    //Questions
+    List<question_class> questionsList;
 
     private void Awake() {
         questionsPanel = GameObject.Find("ui_question_main_panel");
@@ -47,7 +53,9 @@ public class game_manager: MonoBehaviour {
         toggleAttackModal();
         toggleQuestionPanel(false);
         //attackModal.SetActive(false);
-        scene_loader.doneLoading = true;
+        //scene_loader.doneLoading = true;
+
+        StartGame();
     }
 
     // Update is called once per frame
@@ -55,7 +63,116 @@ public class game_manager: MonoBehaviour {
     {
         
     }
+    #region Functions
+    private void StartGame() {
+        StartCoroutine(
+            queryDatabase(
+                "*", "questions", 
+                "WHERE difficulty='" + constant_variables.difficultySelected + "'",
+                0
+            )
+        );
+    }
+
+    #endregion
     #region IEnumerators
+    int rSize;
+    IEnumerator loadQuestions(JSONArray result) {
+        if(scene_loader.getInstance()) {
+            scene_loader.getInstance().setLoadingMsg("Loading Questions...");
+        }
+
+        questionsList = new List<question_class>();
+
+        //Add questions to list in reverse order
+        rSize = result.Count;
+
+        for (int n=0; n < rSize; n++) {
+            if (scene_loader.getInstance()) {
+                scene_loader.getInstance().setLoadingMsg("Loading Question " + (n + 1) + " of " + rSize);
+            }
+            questionsList.Add(new question_class(result[n], n + 1));
+            yield return null;
+        }
+        yield return new WaitForSeconds(1f);
+
+        if (scene_loader.getInstance()) {
+            scene_loader.getInstance().setLoadingMsg("Mounting Questions");
+        }
+        mountNextQuestionToUI();
+        scene_loader.doneLoading = true;
+
+        yield return null;
+    }
+    private void mountNextQuestionToUI(bool popFirstIndex = false) {
+        if (popFirstIndex && questionsList.Count > 0) {
+            Debug.Log("Popping Question");
+            questionsList.RemoveAt(0);
+        }
+
+        if(questionsList.Count > 0) {
+            //Put values to UI
+            lbTitleText.SetText(
+                "Question (" + questionsList[0].getQuestionNumber() +
+                "/" + rSize + ")"
+            );  //Title
+
+            lbQuestion.SetText(questionsList[0].getQuestion()); //Question
+
+            lbChoiceA.SetText(questionsList[0].getChoices()[0]);//A
+            lbChoiceB.SetText(questionsList[0].getChoices()[1]);//B
+            lbChoiceC.SetText(questionsList[0].getChoices()[2]);//C
+            lbChoiceD.SetText(questionsList[0].getChoices()[3]);//D
+        } else {
+            //End the game
+            Debug.Log("No Questions Left");
+        }
+    }
+
+
+    IEnumerator queryDatabase(string select, string from, string where, int processIndex) {
+        List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
+        formData.Add(new MultipartFormDataSection("select=*&from=users&where="));
+
+        string postData = "select=" + select + "&from=" + from + "&where=" + where;
+
+        string uri = constant_variables.getIpAddress() + "returnValues.php?" + postData;
+
+        Debug.Log(uri);
+
+        UnityWebRequest httpRequest = UnityWebRequest.Get(uri);
+        httpRequest.downloadHandler = new DownloadHandlerBuffer();
+
+        yield return httpRequest.SendWebRequest();
+
+        if (httpRequest.result == UnityWebRequest.Result.ConnectionError
+            || httpRequest.result == UnityWebRequest.Result.ProtocolError) {
+            Debug.Log("Error Found..." + httpRequest.error);
+
+        } else {
+            string response = httpRequest.downloadHandler.text;
+            JSONNode result = SimpleJSON.JSON.Parse(response);
+
+            Debug.Log("Server Responded: " + result["result"] + " Rows: " + result["result"].Count + " Columns: " + result["result"][0].Count);
+
+            JSONArray jsonArray = result["result"].AsArray;
+
+
+            switch (processIndex) {
+                case 0: {
+                    StartCoroutine(loadQuestions(jsonArray));
+                    break;
+                }
+                case 1: {
+                    //StartCoroutine(loadRoomsThread(jsonArray));
+                    break;
+                }
+            }
+
+        }
+        yield return null;
+    }
+
     IEnumerator moveQuestionPanel(float endValue, float titleBarEndValue) {
         RectTransform rect = questionsPanel.GetComponent<RectTransform>();
         RectTransform rect2 = btnTitleBar.GetComponent<RectTransform>();

@@ -10,9 +10,11 @@ public class question_class
     private string choice_d;
 
     private int correct_answer;
+    private int qNumber;
 
-    public question_class(JSONNode data) {
+    public question_class(JSONNode data, int qNumber) {
         setQuestion(data);
+        this.qNumber = qNumber;
     }
 
     private void setQuestion(JSONNode data) {
@@ -24,6 +26,10 @@ public class question_class
         choice_d = data["choice_d"];
 
         correct_answer = data["correct_answer"];
+    }
+
+    public int getQuestionNumber() {
+        return qNumber;
     }
 
     public string getQuestion() {

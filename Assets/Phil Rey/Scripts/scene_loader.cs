@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
 using Michsky.UI.ModernUIPack;
+using TMPro;
 
 public class scene_loader : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class scene_loader : MonoBehaviour
 
     public Image fader;
     public ProgressBar progressBar;
+    public TMP_Text lbProgressText;
 
     private Color faderColor;
 
@@ -32,6 +34,13 @@ public class scene_loader : MonoBehaviour
     {
         firstRun();
     }
+    public void setLoadingMsg(string txt) {
+        lbProgressText.SetText(txt);
+    }
+    public static scene_loader getInstance() {
+        return instance;
+    }
+
     private void firstRun() {
         fader.gameObject.SetActive(true);
         Color curColor = fader.color;
