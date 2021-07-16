@@ -63,6 +63,7 @@ public class db_query : MonoBehaviour
             //Debug.Log("Server Responded: " + result["result"][0]["display_name"].ToString() + " Rows: " + result["result"].Count + " Columns: " + result["result"][0].Count);
             
             JSONArray jsonArray = result["result"].AsArray;
+            
 
             switch (functionSelected)
             {

@@ -47,18 +47,24 @@ public class ui_manager_main_menu : MonoBehaviour
     public void play() {
         btn_next.GetComponent<Button>().onClick.Invoke();
     }
+    public void startGame() {
+        scene_loader.loasdScene(2);
+    }
     public void setDifficulty(int index) {
         switch (index) {
             case 0: {
                 lb_difficulty.text = "Easy";
+                constant_variables.difficultySelected = index;
                 break;
             }
             case 1: {
                 lb_difficulty.text = "Medium";
+                constant_variables.difficultySelected = index;
                 break;
             }
             case 2: {
                 lb_difficulty.text = "Hard";
+                constant_variables.difficultySelected = index;
                 break;
             }
         }

@@ -81,6 +81,15 @@ public class scene_loader : MonoBehaviour
         while (!doneTransition) {
             yield return null;
         }
+
+        switch (index) {
+            case 2: {
+                Screen.orientation = ScreenOrientation.Landscape; break;
+            }default: {
+                Screen.orientation = ScreenOrientation.Portrait; break;
+            }
+        }
+
         progressBar.gameObject.SetActive(true);
         progressBar.currentPercent = 0;
 
