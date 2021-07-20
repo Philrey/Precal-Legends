@@ -50,6 +50,7 @@ public class game_manager: MonoBehaviour {
     // Start is called before the first frame update
     void Start()
     {
+        resumeGame();
         toggleAttackModal();
         toggleQuestionPanel(false);
         //attackModal.SetActive(false);
@@ -74,12 +75,42 @@ public class game_manager: MonoBehaviour {
         );
     }
 
+    private void mountNextQuestionToUI(bool popFirstIndex = false) {
+        if (popFirstIndex && questionsList.Count > 0) {
+            Debug.Log("Popping Question");
+            questionsList.RemoveAt(0);
+        }
+
+        if (questionsList.Count > 0) {
+            //Put values to UI
+            lbTitleText.SetText(
+                "Question (" + questionsList[0].getQuestionNumber() +
+                "/" + rSize + ")"
+            );  //Title
+
+            lbQuestion.SetText(questionsList[0].getQuestion()); //Question
+
+            lbChoiceA.SetText(questionsList[0].getChoices()[0]);//A
+            lbChoiceB.SetText(questionsList[0].getChoices()[1]);//B
+            lbChoiceC.SetText(questionsList[0].getChoices()[2]);//C
+            lbChoiceD.SetText(questionsList[0].getChoices()[3]);//D
+        } else {
+            //End the game
+            Debug.Log("No Questions Left");
+        }
+    }
     #endregion
     #region IEnumerators
     int rSize;
     IEnumerator loadQuestions(JSONArray result) {
         if(scene_loader.getInstance()) {
             scene_loader.getInstance().setLoadingMsg("Loading Questions...");
+        }
+        if(result.Count == 0) {
+            lbTitleText.SetText("Question (0/0)");  //Title
+            btnTitleBar.SetActive(false);
+        } else {
+            btnTitleBar.SetActive(true);
         }
 
         questionsList = new List<question_class>();
@@ -104,32 +135,7 @@ public class game_manager: MonoBehaviour {
 
         yield return null;
     }
-    private void mountNextQuestionToUI(bool popFirstIndex = false) {
-        if (popFirstIndex && questionsList.Count > 0) {
-            Debug.Log("Popping Question");
-            questionsList.RemoveAt(0);
-        }
-
-        if(questionsList.Count > 0) {
-            //Put values to UI
-            lbTitleText.SetText(
-                "Question (" + questionsList[0].getQuestionNumber() +
-                "/" + rSize + ")"
-            );  //Title
-
-            lbQuestion.SetText(questionsList[0].getQuestion()); //Question
-
-            lbChoiceA.SetText(questionsList[0].getChoices()[0]);//A
-            lbChoiceB.SetText(questionsList[0].getChoices()[1]);//B
-            lbChoiceC.SetText(questionsList[0].getChoices()[2]);//C
-            lbChoiceD.SetText(questionsList[0].getChoices()[3]);//D
-        } else {
-            //End the game
-            Debug.Log("No Questions Left");
-        }
-    }
-
-
+    
     IEnumerator queryDatabase(string select, string from, string where, int processIndex) {
         List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
         formData.Add(new MultipartFormDataSection("select=*&from=users&where="));
@@ -190,11 +196,13 @@ public class game_manager: MonoBehaviour {
     #endregion
     #region Button Functions
     public void pauseGame() {
-
+        settingsPanel.SetActive(true);
+        Time.timeScale = 0f;
     }
 
     public void resumeGame() {
-
+        settingsPanel.SetActive(false);
+        Time.timeScale = 1f;
     }
 
     public void toggleAttackModal() {

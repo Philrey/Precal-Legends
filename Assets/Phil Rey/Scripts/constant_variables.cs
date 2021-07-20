@@ -6,7 +6,7 @@ using SimpleJSON;
 public class constant_variables
 {
     public string VERSTION = "1.0";
-    protected static string IP_ADDRESS = "http://localhost/precal/";
+    protected static string IP_ADDRESS = "localhost";
 
     //Game Settings Set
     public static int difficultySelected { get; set; }
@@ -18,15 +18,19 @@ public class constant_variables
         return selectedQuestions[index];
     }
 
+    public static void setIpAddress(string ipAddress) {
+        IP_ADDRESS = ipAddress; //localhost
+    }
+
     public static int getQSize() {
         return selectedQuestions.Count;
     }
 
-    public static string getIpAddress() {
-        return IP_ADDRESS;
+    public static string getIpAddress(bool hostNameOnly = false) {
+        return hostNameOnly ? IP_ADDRESS : getCustomIpAddress(IP_ADDRESS);  // localhost : http://localhost/precal/
     }
 
-    protected string getCustomIpAddress(string hostName) {
-        return $"http://{hostName}/precal";
+    public static string getCustomIpAddress(string hostName) {
+        return $"http://{hostName}/precal/";
     }
 }

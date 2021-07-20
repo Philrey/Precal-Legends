@@ -20,6 +20,8 @@ public class ui_manager_main_menu : MonoBehaviour
     public GameObject btn_next;
     public Transform[] tab_panels;
 
+    public TMP_InputField tfIpAddress;
+
     private IEnumerator loadTabThread;
     // Start is called before the first frame update
     void Start()
@@ -35,6 +37,7 @@ public class ui_manager_main_menu : MonoBehaviour
     }
     void initialize_ui() {
         selectTab(true);
+        loadSavedIpAddress();
     }
 
     public void selectTab(bool direction) {
@@ -44,12 +47,30 @@ public class ui_manager_main_menu : MonoBehaviour
         leftRightDirection = direction;
         StartCoroutine(loadTabs(tab_selector.index));
     }
+    
+    public void loadSavedIpAddress() {
+        string currIp = save_preferences.getSavedIpAddress();
+        constant_variables.setIpAddress(currIp);
+        tfIpAddress.text = currIp;
+    }
+
+    public void log(string toDebug) {
+        Debug.Log(toDebug);
+    }
+    #region Button Functions
+    public void SaveIpAddress() {
+        save_preferences.SaveIPAddress(tfIpAddress.text);
+        constant_variables.setIpAddress(tfIpAddress.text);
+    }
+
     public void play() {
         btn_next.GetComponent<Button>().onClick.Invoke();
     }
+
     public void startGame() {
         scene_loader.loasdScene(2);
     }
+
     public void setDifficulty(int index) {
         switch (index) {
             case 0: {
@@ -70,10 +91,7 @@ public class ui_manager_main_menu : MonoBehaviour
         }
         btn_next.GetComponent<Button>().onClick.Invoke();
     }
-
-    public void log(string toDebug) {
-        Debug.Log(toDebug);
-    }
+    #endregion
     #region Threads
 
     private bool isLoadingTab;
