@@ -187,7 +187,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &216970579
 GameObject:
@@ -3548,7 +3548,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5696721648060802020, guid: d9260a631bb1c4349b45d8d77b8f7af7, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5696721648060802020, guid: d9260a631bb1c4349b45d8d77b8f7af7, type: 3}
       propertyPath: m_LocalScale.x
@@ -4428,6 +4428,18 @@ PrefabInstance:
     - target: {fileID: 3911126704073144059, guid: 43ea948d0ab6a8840a8dbb5c920071f6, type: 3}
       propertyPath: m_Name
       value: ==Combat Stadium==
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572423902798015990, guid: 43ea948d0ab6a8840a8dbb5c920071f6, type: 3}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572423902798015990, guid: 43ea948d0ab6a8840a8dbb5c920071f6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -13.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572423902798015990, guid: 43ea948d0ab6a8840a8dbb5c920071f6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.71
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43ea948d0ab6a8840a8dbb5c920071f6, type: 3}
