@@ -40,7 +40,7 @@ public class enemy_controller : MonoBehaviour,player_class
         if (Input.GetKey(KeyCode.Space)) {
             //attack();
         }
-        if (Input.GetKey(KeyCode.E)) {
+        if (Input.GetKeyDown(KeyCode.E)) {
             takeDamage();
         }
         if (shakeTimer > 0) {
@@ -56,7 +56,6 @@ public class enemy_controller : MonoBehaviour,player_class
     #region Animation Events
     public void hitTarget() {
         target.GetComponent<player_class>().takeDamage();
-
         shakeCamera(5f, 0.5f);
     }
     private void shakeCamera(float intensity, float time) {
@@ -107,15 +106,23 @@ public class enemy_controller : MonoBehaviour,player_class
         }
     }
     public void takeDamage() {
-        anim.SetTrigger("Hurt");
+        health--;
+        Debug.Log("Enemy HP: " + health);
+        if(health <= 0) {
+            die();
+        } else {
+            anim.SetTrigger("Hurt");
+        }
     }
     public void die() {
-
+        Debug.Log("Enemy Dead");
+        anim.SetTrigger("Death");
     }
     public int getHp() {
         return health;
     }
     public void setStats(int hp) {
+        Debug.Log("Enemy HP:" + hp);
         health = hp;
     }
     #endregion

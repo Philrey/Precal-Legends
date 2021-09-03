@@ -17,6 +17,15 @@ public class game_manager: MonoBehaviour {
 
     //Other Text Containers
     private TMP_Text lbTitleText;
+
+    private TMP_Text lbTimer;
+    private timer_class timer;
+
+    private int lives;
+    private Image[] livesImages;
+    [SerializeField] private Sprite emptyHeart;
+    [SerializeField] private Sprite emptyStar;
+
     [SerializeField]private Sprite [] titleBarImages;
 
     //Question Containers
@@ -54,6 +63,14 @@ public class game_manager: MonoBehaviour {
         lbChoiceC = GameObject.Find("lbAnswerC").GetComponent<TMP_Text>();
         lbChoiceD = GameObject.Find("lbAnswerD").GetComponent<TMP_Text>();
 
+        lbTimer = GameObject.Find("lbTimer").GetComponent<TMP_Text>();
+        timer = gameObject.AddComponent<timer_class>();
+
+        livesImages = GameObject.Find("lives").GetComponentsInChildren<Image>();
+        lives = livesImages.Length;
+
+        player.GetComponent<player_class>().setStats(lives);    //Set Player HP
+
         btnTitleBar = GameObject.Find("titleBarBtn");
         cmCamera = GameObject.Find("cmMainCamera");
     }
@@ -69,12 +86,6 @@ public class game_manager: MonoBehaviour {
         //scene_loader.doneLoading = true;
 
         StartGame();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
     #region Functions
     private void StartGame() {
@@ -108,15 +119,28 @@ public class game_manager: MonoBehaviour {
             lbChoiceD.SetText(questionsList[0].getChoices()[3]);//D
         } else {
             //End the game
-
+            timer.stopTimer();
 
             Debug.Log("No Questions Left");
+        }
+    }
+
+    private void updateHpBar() {
+        for (int n = 0, length = livesImages.Length; n < length; n++) {
+            if(n+1 > lives) {
+                livesImages[n].sprite = emptyHeart;
+            }
         }
     }
     #endregion
     #region IEnumerators
     int rSize;
     bool isAttacking = false;
+    IEnumerator gameOverSequence() {
+        Debug.Log("Game Over");
+        yield return null;
+    }
+
     IEnumerator attackSequence() {
         isAttacking = true;
         yield return new WaitForSeconds(1f);
@@ -128,8 +152,10 @@ public class game_manager: MonoBehaviour {
         } else {
             enemy.focusCamToThis();
             enemy.GetComponent<player_class>().attack();
+            lives--;
         }
         yield return new WaitForSeconds(1f);
+        updateHpBar();
         while (!cmCamera.activeSelf) {
             yield return null;
         }
@@ -145,6 +171,7 @@ public class game_manager: MonoBehaviour {
         if(result.Count == 0) {
             lbTitleText.SetText("Question (0/0)");  //Title
             btnTitleBar.SetActive(false);
+            yield break;
         } else {
             btnTitleBar.SetActive(true);
         }
@@ -153,6 +180,7 @@ public class game_manager: MonoBehaviour {
 
         //Add questions to list in reverse order
         rSize = result.Count;
+        enemy.GetComponent<player_class>().setStats(rSize);
 
         for (int n=0; n < rSize; n++) {
             if (scene_loader.getInstance()) {
@@ -168,7 +196,7 @@ public class game_manager: MonoBehaviour {
         }
         mountNextQuestionToUI();
         scene_loader.doneLoading = true;
-
+        timer.startTimer();
         yield return null;
     }
     

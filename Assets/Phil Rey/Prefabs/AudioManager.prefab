@@ -47,7 +47,7 @@ MonoBehaviour:
   - name: bgm
     clip: {fileID: 8300000, guid: e1ffb2720c1fa3640ac2a9d9f7212bcc, type: 3}
     volume: 0.1
-    loop: 0
+    loop: 1
     pitch: 0
     source: {fileID: 0}
   uiSounds:

@@ -56,7 +56,6 @@ public class player_controller : MonoBehaviour,player_class
     #region Animation Events
     public void hitTarget() {
         target.GetComponent<player_class>().takeDamage();
-
         shakeCamera(5f, 0.5f);
     }
     private void shakeCamera(float intensity, float time) {
@@ -108,10 +107,15 @@ public class player_controller : MonoBehaviour,player_class
         }
     }
     public void takeDamage() {
-        anim.SetTrigger("Hurt");
+        health--;
+        if(health <= 0) {
+            die();
+        } else {
+            anim.SetTrigger("Hurt");
+        }
     }
     public void die() {
-
+        anim.SetTrigger("Death");
     }
     public int getHp() {
         return health;
