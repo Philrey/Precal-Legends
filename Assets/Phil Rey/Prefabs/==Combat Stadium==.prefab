@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackPosition: {fileID: 4661299408044232477}
+  target: {fileID: 8748031419532398391}
 --- !u!1 &4661299407332036365
 GameObject:
   m_ObjectHideFlags: 0
@@ -69,7 +70,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4661299407332036365}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: 0, z: 0}
+  m_LocalPosition: {x: 1.25, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 8572423902798015990}
@@ -105,6 +106,18 @@ Transform:
   m_Father: {fileID: 8572423902798015990}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9043151410352967079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9107332666627525466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ef5e6db4dc628f4084ff0eec825f8b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8572423902798015991
 GameObject:
   m_ObjectHideFlags: 0
@@ -152,6 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackPosition: {fileID: 4661299407332036366}
+  target: {fileID: 527072306697738312}
 --- !u!1001 &8572423901638438115
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -237,6 +251,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cb6b985f64a2acf4592d540b24df2ba1, type: 3}
+--- !u!1 &9107332666627525466 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 618366233026176953, guid: cb6b985f64a2acf4592d540b24df2ba1, type: 3}
+  m_PrefabInstance: {fileID: 8572423901638438115}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &9107332666627525465 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 618366233026176954, guid: cb6b985f64a2acf4592d540b24df2ba1, type: 3}
@@ -251,7 +270,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1121429450999791951, guid: 638ab23859fc259409ec551bb608962f, type: 3}
       propertyPath: m_Name
-      value: HeroKnight_Modified
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 3211241543978061080, guid: 638ab23859fc259409ec551bb608962f, type: 3}
       propertyPath: m_RootOrder

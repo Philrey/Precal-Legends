@@ -9,20 +9,18 @@ using DG.Tweening;
 
 public class ui_manager_main_menu : MonoBehaviour
 {
+    //Panels
+    private GameObject[] panels;
+    private GameObject startPanel;
+    private GameObject difficultyPanel;
+    private GameObject summaryPanel;
+    private GameObject settingsPanel;
     
-    
-    public ModalWindowManager loading_modal;
-    public TMP_Text lb_difficulty;
-    [Header("Tab Selection")]
-    private bool leftRightDirection;
-    public HorizontalSelector tab_selector;
-    public GameObject btn_previous;
-    public GameObject btn_next;
-    public Transform[] tab_panels;
-
-    public TMP_InputField tfIpAddress;
-
+    //Fields
+    private TMP_InputField tfIpAddress;
     private IEnumerator loadTabThread;
+
+    int tabSelected = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,21 +31,49 @@ public class ui_manager_main_menu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            backBtnPressed();
+        }
     }
     void initialize_ui() {
-        selectTab(true);
+        startPanel = GameObject.Find("start_panel");
+        difficultyPanel = GameObject.Find("difficulty_panel");
+        summaryPanel = GameObject.Find("summary_panel");
+
+        settingsPanel = GameObject.Find("settings_panel");
+        tfIpAddress = GameObject.Find("tfIpAddressSelected").GetComponent<TMP_InputField>();
+
+        panels = new GameObject[] { 
+            startPanel,difficultyPanel,summaryPanel
+        };
+
+        toggleSettings(false);
+        selectTab(0);
         loadSavedIpAddress();
     }
-
-    public void selectTab(bool direction) {
-        if (isLoadingTab) {
-            return;
+    #region Functions
+    private void backBtnPressed() {
+        if (settingsPanel.activeSelf) {
+            toggleSettings();
+        } else {
+            if(tabSelected != 0) {
+                playUi("cancel");
+                selectTab(tabSelected-1);
+                return;
+            }
         }
-        leftRightDirection = direction;
-        StartCoroutine(loadTabs(tab_selector.index));
     }
-    
+    public void selectTab(int index) {
+        tabSelected = index;
+        for (int n = 0,len = panels.Length; n < len; n++) {
+            if (n == index && !panels[n].activeSelf) {
+                panels[n].SetActive(true);
+            }else if (n != index) {
+                panels[n].SetActive(false);
+            }
+        }
+    }
+
     public void loadSavedIpAddress() {
         string currIp = save_preferences.getSavedIpAddress();
         constant_variables.setIpAddress(currIp);
@@ -57,74 +83,83 @@ public class ui_manager_main_menu : MonoBehaviour
     public void log(string toDebug) {
         Debug.Log(toDebug);
     }
+    private void playBgm(string name) {
+        playSound(name, 0);
+    }
+    private void playUi(string name) {
+        playSound(name, 1);
+    }
+    private void playSfx(string name) {
+        playSound(name, 2);
+    }
+    private void playSound(string name, int soundType) {
+        switch (soundType) {
+            case 0: {
+                GameObject.FindObjectOfType<sound_manager>().playBgSound(name);
+                break;
+            }
+            case 1: {
+                GameObject.FindObjectOfType<sound_manager>().playUiSound(name);
+                break;
+            }
+            case 2: {
+                GameObject.FindObjectOfType<sound_manager>().playSfxSound(name);
+                break;
+            }
+        }
+    }
+    #endregion
+
     #region Button Functions
     public void SaveIpAddress() {
         save_preferences.SaveIPAddress(tfIpAddress.text);
         constant_variables.setIpAddress(tfIpAddress.text);
+        toggleSettings();
     }
 
     public void play() {
-        btn_next.GetComponent<Button>().onClick.Invoke();
+        playUi("click");
+        selectTab(1);
     }
 
     public void startGame() {
+        playUi("click");
         scene_loader.loasdScene(2);
+    }
+
+    public void toggleSettings(bool playSound = true) {
+        if (!settingsPanel.activeSelf) {
+            loadSavedIpAddress();
+            if (playSound) { playUi("click"); }            
+        } else {
+            if (playSound) { playUi("cancel"); }
+        }
+        settingsPanel.SetActive(!settingsPanel.activeSelf);
     }
 
     public void setDifficulty(int index) {
         switch (index) {
             case 0: {
-                lb_difficulty.text = "Easy";
+                //lb_difficulty.text = "Easy";
                 constant_variables.difficultySelected = index;
                 break;
             }
             case 1: {
-                lb_difficulty.text = "Medium";
+                //lb_difficulty.text = "Medium";
                 constant_variables.difficultySelected = index;
                 break;
             }
             case 2: {
-                lb_difficulty.text = "Hard";
+                //lb_difficulty.text = "Hard";
                 constant_variables.difficultySelected = index;
                 break;
             }
         }
-        btn_next.GetComponent<Button>().onClick.Invoke();
+        playUi("click");
+        selectTab(2);
     }
     #endregion
     #region Threads
-
-    private bool isLoadingTab;
-    private IEnumerator loadTabs(int index) {
-        isLoadingTab = true;
-
-        if(index == 0 && leftRightDirection && tab_panels[index].gameObject.activeSelf) {
-            yield break;
-        } 
-        if (index == 2 && !leftRightDirection && tab_panels[index].gameObject.activeSelf) {
-            yield break;
-        }
-
-        //Enable/Disable Buttons
-        btn_next.SetActive(index == 2 || index == 0? false : true);
-        btn_previous.SetActive(index == 0 ? false : true);
-
-        RectTransform previous = tab_panels[leftRightDirection ? index + 1 : index - 1].GetComponent<RectTransform>();
-        RectTransform next = tab_panels[index].GetComponent<RectTransform>();
-
-        //Activate and move to center
-        next.gameObject.SetActive(true);
-        next.DOAnchorPosX(0, 0.5f, true);
-
-        previous.DOAnchorPosX(leftRightDirection? 1000 : -1000, 0.5f, true);
-        while (DOTween.IsTweening(next)) {
-            yield return null;
-        }
-        previous.gameObject.SetActive(false);
-
-        isLoadingTab = false;
-        yield return null;
-    }
 
     private IEnumerator query_db_and_execute_command(string select, string from, string where, int functionIndex) {
 

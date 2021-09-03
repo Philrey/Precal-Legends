@@ -12,6 +12,7 @@ public class game_manager: MonoBehaviour {
     //Panels
     private GameObject questionsPanel;
     private GameObject settingsPanel;
+    private GameObject gameOverPanel;
     private GameObject attackModal;
 
     //Other Text Containers
@@ -28,12 +29,21 @@ public class game_manager: MonoBehaviour {
     //Buttons
     GameObject btnTitleBar;
 
+    //Cameras
+    GameObject cmCamera;
+
     //Questions
     List<question_class> questionsList;
+
+    //Variables
+    int choiceSelected;
+    [SerializeField] private player_controller player;
+    [SerializeField] private enemy_controller enemy;
 
     private void Awake() {
         questionsPanel = GameObject.Find("ui_question_main_panel");
         settingsPanel = GameObject.Find("settingsPanel");
+        gameOverPanel = GameObject.Find("gameOverPanel");
         attackModal = GameObject.Find("attackModal");
 
         lbTitleText = GameObject.Find("text_title_bar").GetComponent<TMP_Text>();
@@ -45,6 +55,7 @@ public class game_manager: MonoBehaviour {
         lbChoiceD = GameObject.Find("lbAnswerD").GetComponent<TMP_Text>();
 
         btnTitleBar = GameObject.Find("titleBarBtn");
+        cmCamera = GameObject.Find("cmMainCamera");
     }
 
     // Start is called before the first frame update
@@ -53,6 +64,7 @@ public class game_manager: MonoBehaviour {
         resumeGame();
         toggleAttackModal();
         toggleQuestionPanel(false);
+        toggleGameOverScreen();
         //attackModal.SetActive(false);
         //scene_loader.doneLoading = true;
 
@@ -96,12 +108,36 @@ public class game_manager: MonoBehaviour {
             lbChoiceD.SetText(questionsList[0].getChoices()[3]);//D
         } else {
             //End the game
+
+
             Debug.Log("No Questions Left");
         }
     }
     #endregion
     #region IEnumerators
     int rSize;
+    bool isAttacking = false;
+    IEnumerator attackSequence() {
+        isAttacking = true;
+        yield return new WaitForSeconds(1f);
+        //1. Check answer
+        if (questionsList[0].isAnswerCorrect(choiceSelected)) {
+            player.focusCamToThis();
+            player.GetComponent<player_class>().attack();
+            mountNextQuestionToUI(true);
+        } else {
+            enemy.focusCamToThis();
+            enemy.GetComponent<player_class>().attack();
+        }
+        yield return new WaitForSeconds(1f);
+        while (!cmCamera.activeSelf) {
+            yield return null;
+        }
+        toggleTitleBarBtn();
+        isAttacking = false;
+        yield return null;
+    }
+
     IEnumerator loadQuestions(JSONArray result) {
         if(scene_loader.getInstance()) {
             scene_loader.getInstance().setLoadingMsg("Loading Questions...");
@@ -137,6 +173,7 @@ public class game_manager: MonoBehaviour {
     }
     
     IEnumerator queryDatabase(string select, string from, string where, int processIndex) {
+        cmCamera.SetActive(false);
         List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
         formData.Add(new MultipartFormDataSection("select=*&from=users&where="));
 
@@ -176,6 +213,7 @@ public class game_manager: MonoBehaviour {
             }
 
         }
+        cmCamera.SetActive(true);
         yield return null;
     }
 
@@ -195,6 +233,21 @@ public class game_manager: MonoBehaviour {
 
     #endregion
     #region Button Functions
+    public void selectAnswer(int choice) {
+        toggleAttackModal();
+        choiceSelected = choice;
+    }
+    public void attackWithAnswer() {
+        if (isAttacking) {
+            Debug.Log("Still attacking. Please wait");
+            return;
+        }
+        Debug.Log("Attacking With choice " + choiceSelected);
+        toggleQuestionPanel(false);
+        toggleTitleBarBtn();
+        toggleAttackModal();
+        StartCoroutine(attackSequence());
+    }
     public void pauseGame() {
         settingsPanel.SetActive(true);
         Time.timeScale = 0f;
@@ -205,8 +258,18 @@ public class game_manager: MonoBehaviour {
         Time.timeScale = 1f;
     }
 
+    public void returnToMainMenu() {
+        scene_loader.loasdScene(1);
+    }
+    public void toggleGameOverScreen() {
+        gameOverPanel.SetActive(!gameOverPanel.activeSelf);
+    }
     public void toggleAttackModal() {
         attackModal.SetActive(!attackModal.activeSelf);
+    }
+
+    void toggleTitleBarBtn() {
+        btnTitleBar.SetActive(!btnTitleBar.activeSelf);
     }
 
     public void toggleQuestionPanel(bool showHide) {
