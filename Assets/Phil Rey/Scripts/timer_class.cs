@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class timer_class : MonoBehaviour
-{
+public class timer_class: MonoBehaviour {
     int minutes;
     int seconds;
 
     TMP_Text lbTimer;
     IEnumerator counter;
 
-    void Awake(){
+    void Awake() {
         lbTimer = GameObject.Find("lbTimer").GetComponent<TMP_Text>();
         counter = startTimerCounter();
     }
@@ -25,14 +24,17 @@ public class timer_class : MonoBehaviour
     }
 
     private string addZeroes(int value) {
-        if(value < 10) {
+        if (value < 10) {
             return "0" + value.ToString();
         }
         return value.ToString();
     }
 
-    private string getTimeText() {
+    public string getTimeText() {
         return addZeroes(minutes) + ":" + addZeroes(seconds);
+    }
+    public int [] getTime() {
+        return new int []{minutes, seconds};
     }
 
     IEnumerator startTimerCounter() {

@@ -66,12 +66,13 @@ public class sound_manager : MonoBehaviour
         Debug.LogWarning(name + " sound Was not found in Bg Sounds.");
     }
 
-    public void playUiSound(string name, bool stop = false) {
+    public void playUiSound(string name, bool stop = false, float pitch = 1f) {
         foreach (Sound s in uiSounds) {
             if (s.name == name) {
                 if (stop) {
                     s.source.Stop();
                 } else {
+                    s.source.pitch = pitch;
                     s.source.Play();
                 }
                 return;
@@ -80,12 +81,13 @@ public class sound_manager : MonoBehaviour
         Debug.LogWarning(name + " sound Was not found in Ui Sounds.");
     }
 
-    public void playSfxSound(string name, bool stop = false) {
+    public void playSfxSound(string name, bool stop = false, float pitch = 1f) {
         foreach (Sound s in sfxSounds) {
             if (s.name == name) {
                 if (stop) {
                     s.source.Stop();
                 } else {
+                    s.source.pitch = pitch;
                     s.source.Play();
                 }
                 return;

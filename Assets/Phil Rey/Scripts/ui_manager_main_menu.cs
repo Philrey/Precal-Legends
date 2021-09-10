@@ -15,9 +15,10 @@ public class ui_manager_main_menu : MonoBehaviour
     private GameObject difficultyPanel;
     private GameObject summaryPanel;
     private GameObject settingsPanel;
-    
+
     //Fields
     private TMP_InputField tfIpAddress;
+    private TMP_InputField tfPlayerName;
     private IEnumerator loadTabThread;
 
     int tabSelected = 0;
@@ -42,6 +43,7 @@ public class ui_manager_main_menu : MonoBehaviour
 
         settingsPanel = GameObject.Find("settings_panel");
         tfIpAddress = GameObject.Find("tfIpAddressSelected").GetComponent<TMP_InputField>();
+        tfPlayerName = GameObject.Find("tfPlayerName").GetComponent<TMP_InputField>();
 
         panels = new GameObject[] { 
             startPanel,difficultyPanel,summaryPanel
@@ -49,6 +51,7 @@ public class ui_manager_main_menu : MonoBehaviour
 
         toggleSettings(false);
         selectTab(0);
+        loadSavedPlayerName();
         loadSavedIpAddress();
     }
     #region Functions
@@ -80,6 +83,12 @@ public class ui_manager_main_menu : MonoBehaviour
         tfIpAddress.text = currIp;
     }
 
+    public void loadSavedPlayerName() {
+        string currPlayerName = save_preferences.getSavedPlayerName();
+        constant_variables.setPlayerName(currPlayerName);
+        tfPlayerName.text = currPlayerName;
+    }
+    #region Sound Manager Controls
     public void log(string toDebug) {
         Debug.Log(toDebug);
     }
@@ -109,9 +118,13 @@ public class ui_manager_main_menu : MonoBehaviour
         }
     }
     #endregion
+    #endregion
 
     #region Button Functions
-    public void SaveIpAddress() {
+    public void saveSettings() {
+        save_preferences.SavePlayerName(tfPlayerName.text);
+        constant_variables.setPlayerName(tfPlayerName.text);
+
         save_preferences.SaveIPAddress(tfIpAddress.text);
         constant_variables.setIpAddress(tfIpAddress.text);
         toggleSettings();

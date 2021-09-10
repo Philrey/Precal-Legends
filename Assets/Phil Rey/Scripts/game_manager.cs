@@ -23,8 +23,11 @@ public class game_manager: MonoBehaviour {
 
     private int lives;
     private Image[] livesImages;
+    private Image[] stars;
+    private bool[] starAchievements;
+
     [SerializeField] private Sprite emptyHeart;
-    [SerializeField] private Sprite emptyStar;
+    [SerializeField] private Sprite filledStar;
 
     [SerializeField]private Sprite [] titleBarImages;
 
@@ -34,6 +37,10 @@ public class game_manager: MonoBehaviour {
     private TMP_Text lbChoiceB;
     private TMP_Text lbChoiceC;
     private TMP_Text lbChoiceD;
+
+    //Prefabs
+    [SerializeField] private GameObject rowPrefab;
+    [SerializeField] private GameObject listParent;
 
     //Buttons
     GameObject btnTitleBar;
@@ -89,6 +96,7 @@ public class game_manager: MonoBehaviour {
     }
     #region Functions
     private void StartGame() {
+        starAchievements = new bool[] { true, true, true };
         StartCoroutine(
             queryDatabase(
                 "*", "questions", 
@@ -120,7 +128,7 @@ public class game_manager: MonoBehaviour {
         } else {
             //End the game
             timer.stopTimer();
-
+            StartCoroutine(gameOverSequence(3f,true));
             Debug.Log("No Questions Left");
         }
     }
@@ -132,11 +140,90 @@ public class game_manager: MonoBehaviour {
             }
         }
     }
+
+    private void loadRankings(JSONArray result) {
+        if(result.Count <= 0) {
+            Debug.Log("No Rankings for this difficulty");
+            return;
+        }
+
+        for(int n = 0, len = result.Count; n < len; n++) {
+            GameObject obj = GameObject.Instantiate(rowPrefab,listParent.transform);
+            obj.GetComponent<player_row>().setValues(
+                (n + 1).ToString(),                                         //Rank N
+                result[n]["name"],                                               //Name
+                addZeroes(result[n]["minutes"]) + ":"+ addZeroes(result[n]["seconds"])      //Time
+            );
+        }
+    }
+    private string addZeroes(int value) {
+        if (value < 10) {
+            return "0" + value.ToString();
+        }
+        return value.ToString();
+    }
+
+    private List<int> randomizeOrder(List<int> orderedList) {
+        
+
+        return null;
+    }
     #endregion
     #region IEnumerators
     int rSize;
     bool isAttacking = false;
-    IEnumerator gameOverSequence() {
+    bool insertingData = false;
+    IEnumerator gameOverSequence(float waitTime,bool winLose) {
+        starAchievements[0] = winLose;
+        int [] timeSpent = timer.getTime();
+        starAchievements[2] = timeSpent[0] < 5;
+
+        toggleTitleBarBtn();
+        yield return new WaitForSecondsRealtime(waitTime);
+        //yield return new WaitForSeconds(waitTime);
+        toggleGameOverScreen();
+
+        //Get Textfields
+        TMP_Text titleText = GameObject.Find("txt_gameOver").GetComponent<TMP_Text>();
+        TMP_Text rankingText = GameObject.Find("lb_HS").GetComponent<TMP_Text>();
+        TMP_Text timerText = GameObject.Find("lbDetails3").GetComponent<TMP_Text>();
+
+        stars = GameObject.Find("stars").GetComponentsInChildren<Image>();
+
+        //Load Achievements
+        titleText.SetText(winLose? "Mission Complete" : "Game Over");
+        rankingText.SetText("Rankings (" + constant_variables.getDifficultyName() + ")");
+
+        int[] timerLimit  = constant_variables.getTimerLimit();
+        timerText.SetText("- Complete under "+constant_variables.getTimeText(timerLimit)+" minutes (" + timer.getTimeText() + ")");
+
+        //Insert Results to DB
+        string name = constant_variables.PLAYER_NAME;
+        int diff = constant_variables.difficultySelected;
+        int[] time = timer.getTime();
+        bool addToHighScores = true;
+        //Load stars
+        yield return new WaitForSeconds(1f);
+        for(int n = 0; n < 3; n++) {
+            if (starAchievements[n]) {
+                stars[n].sprite = filledStar;
+            } else {
+                addToHighScores = false;
+            }
+            playUi("click");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        if (addToHighScores) {
+            IEnumerator task = insertValues("highscores", "id,name,difficulty,minutes,seconds", "NULL,'" + name + "'," + diff + "," + time[0] + "," + time[1]);
+            StartCoroutine(task);
+
+            yield return new WaitUntil(() => insertingData == false);
+        }
+        //Load Rankings
+        StartCoroutine(
+            queryDatabase("*","highscores","WHERE difficulty="+constant_variables.difficultySelected+" ORDER BY minutes ASC, seconds ASC",1)
+        );
         Debug.Log("Game Over");
         yield return null;
     }
@@ -153,6 +240,8 @@ public class game_manager: MonoBehaviour {
             enemy.focusCamToThis();
             enemy.GetComponent<player_class>().attack();
             lives--;
+
+            starAchievements[1] = false;
         }
         yield return new WaitForSeconds(1f);
         updateHpBar();
@@ -161,6 +250,10 @@ public class game_manager: MonoBehaviour {
         }
         toggleTitleBarBtn();
         isAttacking = false;
+        if(lives <= 0) {
+            timer.stopTimer();
+            StartCoroutine(gameOverSequence(3f,false));
+        }
         yield return null;
     }
 
@@ -200,10 +293,45 @@ public class game_manager: MonoBehaviour {
         yield return null;
     }
     
+    IEnumerator insertValues(string table, string columnNames, string values) {
+        insertingData = true;
+        List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
+        formData.Add(new MultipartFormDataSection("select=*&from=users&where="));
+
+        string postData = "tName=" + table + "&cNames=" + columnNames + "&cValues=" + values;
+
+        string uri = constant_variables.getIpAddress() + "insertValues.php?" + postData;
+        Debug.Log(uri);
+
+        UnityWebRequest httpRequest = UnityWebRequest.Get(uri);
+        httpRequest.downloadHandler = new DownloadHandlerBuffer();
+
+        yield return httpRequest.SendWebRequest();
+
+        if (httpRequest.result == UnityWebRequest.Result.ConnectionError
+            || httpRequest.result == UnityWebRequest.Result.ProtocolError) {
+            Debug.Log("Error Found..." + httpRequest.error);
+
+        } else {
+            string response = httpRequest.downloadHandler.text;
+            JSONNode result = SimpleJSON.JSON.Parse(response);
+
+            Debug.Log("Server Responded: " + result["result"] + " Rows: " + result["result"].Count + " Columns: " + result["result"][0].Count);
+
+            JSONArray jsonArray = result["queryResult"].AsArray;
+
+            if (jsonArray[0]["result"] == "true") {
+
+            } else {
+                Debug.Log("Insert Failed");
+            }
+        }
+        insertingData = false;
+        yield return null;
+    }
     IEnumerator queryDatabase(string select, string from, string where, int processIndex) {
         cmCamera.SetActive(false);
         List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
-        formData.Add(new MultipartFormDataSection("select=*&from=users&where="));
 
         string postData = "select=" + select + "&from=" + from + "&where=" + where;
 
@@ -235,7 +363,7 @@ public class game_manager: MonoBehaviour {
                     break;
                 }
                 case 1: {
-                    //StartCoroutine(loadRoomsThread(jsonArray));
+                    loadRankings(jsonArray);
                     break;
                 }
             }
@@ -262,6 +390,7 @@ public class game_manager: MonoBehaviour {
     #endregion
     #region Button Functions
     public void selectAnswer(int choice) {
+        playUi("click");
         toggleAttackModal();
         choiceSelected = choice;
     }
@@ -277,16 +406,23 @@ public class game_manager: MonoBehaviour {
         StartCoroutine(attackSequence());
     }
     public void pauseGame() {
+        if (scene_loader.doneLoading) {
+            playUi("click");
+        }
         settingsPanel.SetActive(true);
         Time.timeScale = 0f;
     }
 
     public void resumeGame() {
+        if (scene_loader.doneLoading) {
+            playUi("cancel");
+        }
         settingsPanel.SetActive(false);
         Time.timeScale = 1f;
     }
 
     public void returnToMainMenu() {
+        playUi("click");
         scene_loader.loasdScene(1);
     }
     public void toggleGameOverScreen() {
@@ -296,7 +432,7 @@ public class game_manager: MonoBehaviour {
         attackModal.SetActive(!attackModal.activeSelf);
     }
 
-    void toggleTitleBarBtn() {
+    public void toggleTitleBarBtn() {
         btnTitleBar.SetActive(!btnTitleBar.activeSelf);
     }
 
@@ -310,6 +446,40 @@ public class game_manager: MonoBehaviour {
                 StartCoroutine(moveQuestionPanel(-370f, 54f));
                 btnTitleBar.GetComponent<Button>().interactable = true;
                 btnTitleBar.GetComponent<Image>().sprite = titleBarImages[1];
+            }
+        }
+    }
+    #endregion
+    #region Sound Manager Controls
+    public void log(string toDebug) {
+        Debug.Log(toDebug);
+    }
+    private void playBgm(string name) {
+        playSound(name, 0);
+    }
+    public void playUi(string name) {
+        if(name == "click") {
+            playSound(name, 1, 1);
+        } else {
+            playSound(name, 1);
+        }
+    }
+    private void playSfx(string name) {
+        playSound(name, 2);
+    }
+    private void playSound(string name, int soundType, float pitch = 1f) {
+        switch (soundType) {
+            case 0: {
+                GameObject.FindObjectOfType<sound_manager>().playBgSound(name);
+                break;
+            }
+            case 1: {
+                GameObject.FindObjectOfType<sound_manager>().playUiSound(name,false,pitch);
+                break;
+            }
+            case 2: {
+                GameObject.FindObjectOfType<sound_manager>().playSfxSound(name);
+                break;
             }
         }
     }

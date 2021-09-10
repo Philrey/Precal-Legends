@@ -56,6 +56,7 @@ public class enemy_controller : MonoBehaviour,player_class
     #region Animation Events
     public void hitTarget() {
         target.GetComponent<player_class>().takeDamage();
+        playSfx("attack", 0.5f);
         shakeCamera(5f, 0.5f);
     }
     private void shakeCamera(float intensity, float time) {
@@ -95,6 +96,36 @@ public class enemy_controller : MonoBehaviour,player_class
         anim.SetBool("isWalking", false);
         isAttacking = false;
         yield return null;
+    }
+    #endregion
+    #region Sound Manager Controls
+    public void log(string toDebug) {
+        Debug.Log(toDebug);
+    }
+    private void playBgm(string name) {
+        playSound(name, 0);
+    }
+    private void playUi(string name) {
+        playSound(name, 1);
+    }
+    private void playSfx(string name,float pitch) {
+        playSound(name, 2, pitch);
+    }
+    private void playSound(string name, int soundType, float pitch = 1) {
+        switch (soundType) {
+            case 0: {
+                GameObject.FindObjectOfType<sound_manager>().playBgSound(name);
+                break;
+            }
+            case 1: {
+                GameObject.FindObjectOfType<sound_manager>().playUiSound(name);
+                break;
+            }
+            case 2: {
+                GameObject.FindObjectOfType<sound_manager>().playSfxSound(name,false,pitch);
+                break;
+            }
+        }
     }
     #endregion
     #region player_class Interface implementation

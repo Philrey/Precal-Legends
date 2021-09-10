@@ -53,20 +53,26 @@ MonoBehaviour:
   uiSounds:
   - name: click
     clip: {fileID: 8300000, guid: 20f987be44b725846997d06ca728f293, type: 3}
-    volume: 1
+    volume: 0.25
     loop: 0
     pitch: 0
     source: {fileID: 0}
   - name: cancel
     clip: {fileID: 8300000, guid: 612273480f855134d8b97470227df4fb, type: 3}
-    volume: 1
+    volume: 0.8
     loop: 0
     pitch: 0
     source: {fileID: 0}
   sfxSounds:
   - name: attack
     clip: {fileID: 8300000, guid: c558f9e0ffa61dc4a82c1bc687e7fd76, type: 3}
-    volume: 1
+    volume: 0.5
+    loop: 0
+    pitch: 0
+    source: {fileID: 0}
+  - name: attack2
+    clip: {fileID: 8300000, guid: c558f9e0ffa61dc4a82c1bc687e7fd76, type: 3}
+    volume: 0.5
     loop: 0
     pitch: 0
     source: {fileID: 0}

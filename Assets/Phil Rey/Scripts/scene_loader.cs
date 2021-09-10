@@ -83,7 +83,7 @@ public class scene_loader : MonoBehaviour
 
     public IEnumerator loadScene(int index, bool firstRun = false) {
         doneLoading = false;
-
+        setLoadingMsg("Loading");
         if (!firstRun) {
             fadeIn();
         }
