@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -99,7 +99,7 @@ public class game_manager: MonoBehaviour {
         starAchievements = new bool[] { true, true, true };
         StartCoroutine(
             queryDatabase(
-                "*", "questions", 
+                "*", "v_random_questions", 
                 "WHERE difficulty='" + constant_variables.difficultySelected + "'",
                 0
             )
@@ -150,9 +150,9 @@ public class game_manager: MonoBehaviour {
         for(int n = 0, len = result.Count; n < len; n++) {
             GameObject obj = GameObject.Instantiate(rowPrefab,listParent.transform);
             obj.GetComponent<player_row>().setValues(
-                (n + 1).ToString(),                                         //Rank N
-                result[n]["name"],                                               //Name
-                addZeroes(result[n]["minutes"]) + ":"+ addZeroes(result[n]["seconds"])      //Time
+                (n + 1).ToString(),                                                     //Rank N
+                result[n]["name"],                                                      //Name
+                addZeroes(result[n]["minutes"]) + ":"+ addZeroes(result[n]["seconds"])  //Time
             );
         }
     }
@@ -162,11 +162,11 @@ public class game_manager: MonoBehaviour {
         }
         return value.ToString();
     }
-
-    private List<int> randomizeOrder(List<int> orderedList) {
-        
-
-        return null;
+    //Unicode Characters s
+    char squareRoot = '\u221a';
+    private string parseHtmlText(string value) {
+        string temp = value.Replace("%E2%88%9A", squareRoot.ToString());
+        return temp;
     }
     #endregion
     #region IEnumerators
@@ -179,6 +179,11 @@ public class game_manager: MonoBehaviour {
         starAchievements[2] = timeSpent[0] < 5;
 
         toggleTitleBarBtn();
+        if (winLose) {
+            playUi("winner");
+        } else {
+            playUi("gameover");
+        }
         yield return new WaitForSecondsRealtime(waitTime);
         //yield return new WaitForSeconds(waitTime);
         toggleGameOverScreen();
@@ -350,6 +355,7 @@ public class game_manager: MonoBehaviour {
 
         } else {
             string response = httpRequest.downloadHandler.text;
+            response = parseHtmlText(response);
             JSONNode result = SimpleJSON.JSON.Parse(response);
 
             Debug.Log("Server Responded: " + result["result"] + " Rows: " + result["result"].Count + " Columns: " + result["result"][0].Count);
@@ -423,6 +429,7 @@ public class game_manager: MonoBehaviour {
 
     public void returnToMainMenu() {
         playUi("click");
+        Time.timeScale = 1f;
         scene_loader.loasdScene(1);
     }
     public void toggleGameOverScreen() {
@@ -478,7 +485,7 @@ public class game_manager: MonoBehaviour {
                 break;
             }
             case 2: {
-                GameObject.FindObjectOfType<sound_manager>().playSfxSound(name);
+                GameObject.FindObjectOfType<sound_manager>().playSfxSound(name,false,pitch);
                 break;
             }
         }

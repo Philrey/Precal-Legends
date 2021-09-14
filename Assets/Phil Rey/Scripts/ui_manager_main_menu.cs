@@ -19,6 +19,7 @@ public class ui_manager_main_menu : MonoBehaviour
     //Fields
     private TMP_InputField tfIpAddress;
     private TMP_InputField tfPlayerName;
+    private TMP_Text lbSummaryText;
     private IEnumerator loadTabThread;
 
     int tabSelected = 0;
@@ -44,6 +45,7 @@ public class ui_manager_main_menu : MonoBehaviour
         settingsPanel = GameObject.Find("settings_panel");
         tfIpAddress = GameObject.Find("tfIpAddressSelected").GetComponent<TMP_InputField>();
         tfPlayerName = GameObject.Find("tfPlayerName").GetComponent<TMP_InputField>();
+        lbSummaryText = GameObject.Find("lbSummary").GetComponent<TMP_Text>();
 
         panels = new GameObject[] { 
             startPanel,difficultyPanel,summaryPanel
@@ -168,6 +170,7 @@ public class ui_manager_main_menu : MonoBehaviour
                 break;
             }
         }
+        lbSummaryText.text = "Difficulty: " + constant_variables.getDifficultyName() + "\nTime to beat: 05:00";
         playUi("click");
         selectTab(2);
     }

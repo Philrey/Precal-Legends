@@ -45,8 +45,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bgSounds:
   - name: bgm
-    clip: {fileID: 8300000, guid: e1ffb2720c1fa3640ac2a9d9f7212bcc, type: 3}
-    volume: 0.1
+    clip: {fileID: 8300000, guid: 2e5c622f900a3bc4c8934a7635935e80, type: 3}
+    volume: 0.5
     loop: 1
     pitch: 0
     source: {fileID: 0}
@@ -59,6 +59,18 @@ MonoBehaviour:
     source: {fileID: 0}
   - name: cancel
     clip: {fileID: 8300000, guid: 612273480f855134d8b97470227df4fb, type: 3}
+    volume: 0.8
+    loop: 0
+    pitch: 0
+    source: {fileID: 0}
+  - name: winner
+    clip: {fileID: 8300000, guid: 3234396af0e78d64fad23c115b7f6b06, type: 3}
+    volume: 0.8
+    loop: 0
+    pitch: 0
+    source: {fileID: 0}
+  - name: gameover
+    clip: {fileID: 8300000, guid: aaf091bb3b6c6bb4faeed49315ec8e33, type: 3}
     volume: 0.8
     loop: 0
     pitch: 0
