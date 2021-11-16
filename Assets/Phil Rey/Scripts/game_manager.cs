@@ -176,7 +176,7 @@ public class game_manager: MonoBehaviour {
     IEnumerator gameOverSequence(float waitTime,bool winLose) {
         starAchievements[0] = winLose;
         int [] timeSpent = timer.getTime();
-        starAchievements[2] = timeSpent[0] < 5;
+        starAchievements[2] = timeSpent[0] < 5 && winLose;
 
         toggleTitleBarBtn();
         if (winLose) {
